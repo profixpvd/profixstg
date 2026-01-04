@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Instant Repair Quote | ProFix – Providence, RI</title>
+  <meta name="description" content="Get an instant repair quote from ProFix in Providence, RI. Phone, tablet, and laptop repair with same-day service available.">
+  <meta name="theme-color" content="#b11226">
+  <link rel="canonical" href="https://profixpvd.com/">
+
+  <!-- ✅ EXTERNAL CSS (SAME LEVEL AS INDEX.HTML) -->
+  <link rel="stylesheet" href="/profix-modern.css">
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <!-- INLINE SVG LOGO -->
+    <svg viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg" aria-label="ProFix logo">
+      <defs>
+        <linearGradient id="gradRed" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e11d48"/>
+          <stop offset="100%" stop-color="#7f1d1d"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="0" rx="28" ry="28" width="140" height="140" fill="url(#gradRed)"/>
+      <path d="M56 34c-8 8-10 20-6 30l-14 14c-3 3-3 8 0 11l9 9c3 3 8 3 11 0l14-14c10 4 22 2 30-6l-14-14-10 2-8-8 2-10z" fill="#fff"/>
+      <rect x="78" y="28" width="36" height="84" rx="6" fill="none" stroke="#fff" stroke-width="4"/>
+      <circle cx="96" cy="102" r="3" fill="#fff"/>
+
+      <text x="165" y="92" font-size="72" font-weight="900" fill="#b11226" font-family="Segoe UI, Arial">
+        ProFix
+      </text>
+      <text x="168" y="122" font-size="18" font-weight="700" fill="#374151" font-family="Segoe UI, Arial">
+        Phone • Tablet • Laptop Repair
+      </text>
+    </svg>
+  </div>
+
+  <p class="tagline">Local Repair Experts • Providence, RI</p>
+
+  <nav class="main-nav">
+    <a href="/index.html">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/services.html">Services</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/terms.html">Terms</a>
+    <a href="/privacy.html">Privacy</a>
+  </nav>
+</header>
+
+<main class="content">
+  <section class="card">
+    <h2>Get an Instant Repair Quote</h2>
+
+    <form id="quoteForm">
+      <label>Name</label>
+      <input name="Name" required>
+
+      <label>Phone Number</label>
+      <div class="phone-wrap">
+        <span class="phone-prefix">+1</span>
+        <input id="Phone" name="Phone" required placeholder="4019990100" inputmode="numeric">
+      </div>
+
+      <label>Email</label>
+      <input name="Email" type="email" required>
+
+      <label>Brand</label>
+      <input name="Brand" required>
+
+      <label>Device Type</label>
+      <input name="DeviceType" placeholder="Phone / Tablet / Laptop" required>
+
+      <label>Device Model</label>
+      <input name="DeviceModel" required>
+
+      <label>Issue</label>
+      <input name="Issue" required>
+
+      <!-- ✅ BREVO / TELNYX COMPLIANT CHECKBOXES -->
+      <div class="check">
+        <input type="checkbox" name="sms_transactional">
+        <span>
+          By checking this box and submitting this form, you consent to receive
+          <strong>transactional text messages</strong> for repair status and quotes
+          from <strong>ProFix</strong>. Reply STOP to opt out. Reply HELP for help.
+          Standard message and data rates may apply. Message frequency may vary.
+        </span>
+      </div>
+
+      <div class="check">
+        <input type="checkbox" name="sms_marketing">
+        <span>
+          By checking this box and submitting this form, you consent to receive
+          <strong>text messages for marketing</strong> from <strong>ProFix</strong>.
+          Reply STOP to opt out. Reply HELP for help.
+          Message and data rates may apply. Message frequency may vary.
+        </span>
+      </div>
+
+      <div class="check">
+        <input type="checkbox" required>
+        <span>
+          I agree to the <a href="/terms.html">Terms and Conditions</a> and
+          <a href="/privacy.html">Privacy Policy</a>.
+        </span>
+      </div>
+
+      <button id="submitBtn">Get Quote</button>
+    </form>
+
+    <div id="responseBox"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  © 2025 ProFix • 1712 Mineral Spring Ave, North Providence, RI 02904<br>
+  <a href="tel:14019990100">(401) 999-0100</a> •
+  <a href="mailto:info@profixpvd.com">info@profixpvd.com</a>
+</footer>
+
+<script>
+const WEBHOOK_URL = "https://n8n.profixpvd.com/webhook/4827ed8d-3a15-472e-80fd-719078b7438c";
+
+document.getElementById("Phone").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/[^\d]/g, "").slice(0,10);
+});
+
+const form = document.getElementById("quoteForm");
+const box = document.getElementById("responseBox");
+const btn = document.getElementById("submitBtn");
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  btn.disabled = true;
+  box.className = "loading";
+  box.style.display = "block";
+  box.textContent = "Calculating your quote…";
+
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.Phone = "+1" + data.Phone;
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    box.className = "success";
+    box.textContent = json.message || "Quote received. We’ll contact you shortly.";
+  } catch {
+    box.className = "error";
+    box.textContent = "Submission failed. Please call (401) 999-0100.";
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
